@@ -1,12 +1,12 @@
 package: CMake
 version: "%(tag_basename)s"
-tag: "v3.5.2"
+tag: "v3.7.2"
 source: https://github.com/Kitware/CMake
 build_requires:
  - "GCC-Toolchain:(?!osx)"
 prefer_system: .*
 prefer_system_check: |
-  which cmake && case `cmake --version | sed -e 's/.* //' | cut -d. -f1,2,3 | head -n1` in [0-2]*|3.[0-4].*|3.5.[0-1]) exit 1 ;; esac
+      which cmake && case `cmake --version | sed -e 's/.* //' | cut -d. -f1,2,3 | head -n1` in [0-2]*|3.[0-5].*) exit 1 ;; esac
 ---
 #!/bin/bash -e
 
