@@ -3,10 +3,12 @@ version: "%(commit_hash)s%(defaults_upper)s"
 requires:
   - ROOT
   - DPMJET
-  - fastjet:(?!.*ppc64)
-  - GEANT3
-  - GEANT4_VMC
+#  Not needed rn, much faster without
+#  - fastjet:(?!.*ppc64)
+#  - GEANT3
+#  - GEANT4_VMC
   - Vc
+  - ZeroMQ
 build_requires:
   - CMake
   - "Xcode:(osx.*)"
@@ -14,7 +16,7 @@ env:
   ALICE_ROOT: "$ALIROOT_ROOT"
 prepend_path:
   ROOT_INCLUDE_PATH: "$ALIROOT_ROOT/include"
-source: https://github.com/alisw/AliRoot
+source: https://github.com/rdeckers/AliRoot
 tag: master
 incremental_recipe: |
   make ${JOBS:+-j$JOBS} install
