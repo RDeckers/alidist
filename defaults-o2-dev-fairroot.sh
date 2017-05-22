@@ -1,4 +1,4 @@
-package: defaults-o2-daq
+package: defaults-o2-dev-fairroot
 version: v1
 env:
   CXXFLAGS: "-fPIC -g -O2 -std=c++14"
@@ -43,13 +43,16 @@ overrides:
   protobuf:
     version: "%(tag_basename)s"
     tag: "v3.0.2"
+  O2:
+    version: "%(short_hash)s%(defaults_upper)s"
   CMake:
     version: "%(tag_basename)s"
     tag: "v3.7.2"
     prefer_system_check: |
       which cmake && case `cmake --version | sed -e 's/.* //' | cut -d. -f1,2,3 | head -n1` in [0-2]*|3.[0-5].*) exit 1 ;; esac
-  O2:
-    version: "%(short_hash)s%(defaults_upper)s"
+  FairRoot:
+    version: dev
+    tag: dev
 ---
 # This file is included in any build recipe and it's only used to set
 # environment variables. Which file to actually include can be defined by the

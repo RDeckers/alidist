@@ -1,7 +1,7 @@
 package: FairRoot
-version: dev
-source: https://github.com/FairRootGroup/FairRoot
-tag: dev
+version: "%(tag_basename)s"
+source: https://github.com/alisw/FairRoot
+tag: "alice-dev-20170428"
 requires:
   - generators
   - simulation
@@ -12,6 +12,8 @@ requires:
   - protobuf
   - DDS
   - "GCC-Toolchain:(?!osx)"
+build_requires:
+  - googletest
 env:
   VMCWORKDIR: "$FAIRROOT_ROOT/share/fairbase/examples"
   GEOMPATH:   "$FAIRROOT_ROOT/share/fairbase/examples/common/geometry"
@@ -31,6 +33,7 @@ case $ARCHITECTURE in
     [[ ! $BOOST_ROOT ]] && BOOST_ROOT=`brew --prefix boost`
     [[ ! $ZEROMQ_ROOT ]] && ZEROMQ_ROOT=`brew --prefix zeromq`
     [[ ! $PROTOBUF_ROOT ]] && PROTOBUF_ROOT=`brew --prefix protobuf`
+    [[ ! $NANOMSG_ROOT ]] && NANOMSG_ROOT=`brew --prefix nanomsg`
     [[ ! $GSL_ROOT ]] && GSL_ROOT=`brew --prefix gsl`
     SONAME=dylib
   ;;
@@ -39,28 +42,34 @@ esac
 
 cmake $SOURCEDIR                                                 \
       -DMACOSX_RPATH=OFF                                         \
-      -DCMAKE_CXX_FLAGS="-std=c++11"                             \
+      -DCMAKE_CXX_FLAGS="$CXXFLAGS"                              \
       -DCMAKE_BUILD_TYPE=RelWithDebInfo                          \
       -DROOTSYS=$ROOTSYS                                         \
       -DROOT_CONFIG_SEARCHPATH=$ROOT_ROOT/bin                    \
-      -DNANOMSG_INCLUDE_DIR=$NANOMSG_ROOT/include                \
+      ${NANOMSG_ROOT:+-DNANOMSG_DIR=$NANOMSG_ROOT}               \
       -DPythia6_LIBRARY_DIR=$PYTHIA6_ROOT/lib                    \
       -DGeant3_DIR=$GEANT3_ROOT                                  \
+      -DDISABLE_GO=ON                                            \
+      -DBUILD_EXAMPLES=OFF                                       \
       ${GEANT4_ROOT:+-DGeant4_DIR=$GEANT4_ROOT}                  \
       -DFAIRROOT_MODULAR_BUILD=ON                                \
       ${DDS_ROOT:+-DDDS_PATH=$DDS_ROOT}                          \
-      ${ZEROMQ_ROOT:+-DZMQ_DIR=$ZEROMQ_ROOT}                     \
+      ${ZEROMQ_ROOT:+-DZEROMQ_ROOT=$ZEROMQ_ROOT}                 \
       ${BOOST_ROOT:+-DBOOST_ROOT=$BOOST_ROOT}                    \
       ${BOOST_ROOT:+-DBOOST_INCLUDEDIR=$BOOST_ROOT/include}      \
       ${BOOST_ROOT:+-DBOOST_LIBRARYDIR=$BOOST_ROOT/lib}          \
       ${GSL_ROOT:+-DGSL_DIR=$GSL_ROOT}                           \
+      -DGTEST_ROOT=$GOOGLETEST_ROOT                              \
       -DPROTOBUF_INCLUDE_DIR=$PROTOBUF_ROOT/include              \
       -DPROTOBUF_PROTOC_EXECUTABLE=$PROTOBUF_ROOT/bin/protoc     \
       -DPROTOBUF_LIBRARY=$PROTOBUF_ROOT/lib/libprotobuf.$SONAME  \
       -DCMAKE_INSTALL_PREFIX=$INSTALLROOT
+
 # Limit the number of build processes to avoid exahusting memory when building
 # on smaller machines.
-make ${JOBS:+-j 2} install
+JOBS=$((${JOBS:-1}*2/5))
+[[ $JOBS -gt 0 ]] || JOBS=1
+make -j$JOBS install
 
 # Modulefile
 MODULEDIR="$INSTALLROOT/etc/modulefiles"
@@ -79,12 +88,13 @@ module load BASE/1.0                                                            
             ${GEANT3_VERSION:+GEANT3/$GEANT3_VERSION-$GEANT3_REVISION}                          \\
             ${GEANT4_VMC_VERSION:+GEANT4_VMC/$GEANT4_VMC_VERSION-$GEANT4_VMC_REVISION}          \\
             ${PROTOBUF_VERSION:+protobuf/$PROTOBUF_VERSION-$PROTOBUF_REVISION}                  \\
-            ${PYTHIA6_VERSION:+Pythia6/$PYTHIA6_VERSION-$PYTHIA6_REVISION}                      \\
-            ${PYTHIA_VERSION:+Pythia/$PYTHIA_VERSION-$PYTHIA_REVISION}                          \\
+            ${PYTHIA6_VERSION:+pythia6/$PYTHIA6_VERSION-$PYTHIA6_REVISION}                      \\
+            ${PYTHIA_VERSION:+pythia/$PYTHIA_VERSION-$PYTHIA_REVISION}                          \\
             ${VGM_VERSION:+vgm/$VGM_VERSION-$VGM_REVISION}                                      \\
             ${BOOST_VERSION:+boost/$BOOST_VERSION-$BOOST_REVISION}                              \\
             ROOT/$ROOT_VERSION-$ROOT_REVISION                                                   \\
             ${ZEROMQ_VERSION:+ZeroMQ/$ZEROMQ_VERSION-$ZEROMQ_REVISION}                          \\
+            ${NANOMSG_VERSION:+nanomsg/$NANOMSG_VERSION-$NANOMSG_REVISION}                      \\
             ${DDS_ROOT:+DDS/$DDS_VERSION-$DDS_REVISION}                                         \\
             ${GCC_TOOLCHAIN_ROOT:+GCC-Toolchain/$GCC_TOOLCHAIN_VERSION-$GCC_TOOLCHAIN_REVISION}
 # Our environment

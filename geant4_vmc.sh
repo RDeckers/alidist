@@ -1,6 +1,6 @@
 package: GEANT4_VMC
 version: "%(tag_basename)s%(defaults_upper)s"
-tag: "v3-2-p1"
+tag: "v3-2-p1-alice1"
 source: https://github.com/alisw/geant4_vmc
 requires:
   - ROOT
@@ -8,6 +8,7 @@ requires:
   - vgm
 build_requires:
   - CMake
+  - "Xcode:(osx.*)"
 env:
   G4VMCINSTALL: "$GEANT4_VMC_ROOT"
 ---

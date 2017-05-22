@@ -10,8 +10,19 @@ env:
   DATE_ENV: /date/setup.sh
   DAQ_DIM: /opt/dim
   DAQ_DALIB: /opt/daqDA-lib
+
+disable:
+  - AliEn-Runtime
+  - GCC-Toolchain
+
+overrides:
+  AliRoot:
+    requires:
+      - ROOT
+    build_requires:
+      - DAQ
+      - CMake
 ---
-#!/bin/bash -e
-for PKG in date amore daqDA-lib ACT; do
-  yum info $PKG
-done
+# This file is included in any build recipe and it's only used to set
+# environment variables. Which file to actually include can be defined by the
+# "--defaults" option of alibuild.

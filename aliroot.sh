@@ -2,18 +2,19 @@ package: AliRoot
 version: "%(commit_hash)s%(defaults_upper)s"
 requires:
   - ROOT
+  - DPMJET
   - fastjet:(?!.*ppc64)
   - GEANT3
   - GEANT4_VMC
   - ZeroMQ
 build_requires:
   - CMake
-  - DAQ:slc6.*
+  - "Xcode:(osx.*)"
 env:
   ALICE_ROOT: "$ALIROOT_ROOT"
 prepend_path:
   ROOT_INCLUDE_PATH: "$ALIROOT_ROOT/include"
-source: https://gitlab.cern.ch/alice-legacy/AliRoot-legacy.git
+source: https://github.com/alisw/AliRoot
 tag: master
 incremental_recipe: |
   make ${JOBS:+-j$JOBS} install
@@ -47,18 +48,20 @@ EOF
 source $INSTALLROOT/etc/gcov-setup.sh
 fi
 
-cmake $SOURCEDIR                                                  \
-      -DCMAKE_INSTALL_PREFIX="$INSTALLROOT"                       \
-      -DROOTSYS="$ROOT_ROOT"                                      \
-      ${CMAKE_BUILD_TYPE:+-DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE"} \
-      ${ALIEN_RUNTIME_ROOT:+-DALIEN="$ALIEN_RUNTIME_ROOT"}        \
-      ${FASTJET_ROOT:+-DFASTJET="$FASTJET_ROOT"}                  \
-      ${ZEROMQ_ROOT:+-DZEROMQ=$ZEROMQ_ROOT}                       \
-      ${ALICE_DAQ:+-DDA=ON -DDARPM=ON -DdaqDA=$DAQ_DALIB}         \
-      ${ALICE_DAQ:+-DAMORE_CONFIG=$AMORE_CONFIG}                  \
-      ${ALICE_DAQ:+-DDATE_CONFIG=$DATE_CONFIG}                    \
-      ${ALICE_DAQ:+-DDATE_ENV=$DATE_ENV}                          \
-      ${ALICE_DAQ:+-DDIMDIR=$DAQ_DIM -DODIR=linux}                \
+cmake $SOURCEDIR                                                     \
+      -DCMAKE_INSTALL_PREFIX="$INSTALLROOT"                          \
+      -DROOTSYS="$ROOT_ROOT"                                         \
+      ${CMAKE_BUILD_TYPE:+-DCMAKE_BUILD_TYPE="$CMAKE_BUILD_TYPE"}    \
+      ${ALIEN_RUNTIME_ROOT:+-DALIEN="$ALIEN_RUNTIME_ROOT"}           \
+      ${FASTJET_ROOT:+-DFASTJET="$FASTJET_ROOT"}                     \
+      ${DPMJET_ROOT:+-DDPMJET="$DPMJET_ROOT"}                        \
+      ${ZEROMQ_ROOT:+-DZEROMQ=$ZEROMQ_ROOT}                          \
+      ${ALICE_DAQ:+-DDA=ON -DDARPM=ON -DdaqDA=$DAQ_DALIB}            \
+      ${ALICE_DAQ:+-DAMORE_CONFIG=$AMORE_CONFIG}                     \
+      ${ALICE_DAQ:+-DDATE_CONFIG=$DATE_CONFIG}                       \
+      ${ALICE_DAQ:+-DDATE_ENV=$DATE_ENV}                             \
+      ${ALICE_DAQ:+-DDIMDIR=$DAQ_DIM -DODIR=linux}                   \
+      ${ALICE_SHUTTLE:+-DDIMDIR=$HOME/DIM -DODIR=linux -DSHUTTLE=ON} \
       -DOCDB_INSTALL=PLACEHOLDER
 
 make ${IGNORE_ERRORS:+-k} ${JOBS+-j $JOBS} install
@@ -83,7 +86,7 @@ proc ModulesHelp { } {
 set version $PKGVERSION-@@PKGREVISION@$PKGHASH@@
 module-whatis "ALICE Modulefile for $PKGNAME $PKGVERSION-@@PKGREVISION@$PKGHASH@@"
 # Dependencies
-module load BASE/1.0 ${ROOT_VERSION:+ROOT/$ROOT_VERSION-$ROOT_REVISION} ${FASTJET_VERSION:+fastjet/$FASTJET_VERSION-$FASTJET_REVISION} ${GEANT3_VERSION:+GEANT3/$GEANT3_VERSION-$GEANT3_REVISION} ${GEANT4_VMC_VERSION:+GEANT4_VMC/$GEANT4_VMC_VERSION-$GEANT4_VMC_REVISION} ${VC_VERSION:+Vc/$VC_VERSION-$VC_REVISION}
+module load BASE/1.0 ${ROOT_VERSION:+ROOT/$ROOT_VERSION-$ROOT_REVISION} ${DPMJET_VERSION:+DPMJET/$DPMJET_VERSION-$DPMJET_REVISION} ${FASTJET_VERSION:+fastjet/$FASTJET_VERSION-$FASTJET_REVISION} ${GEANT3_VERSION:+GEANT3/$GEANT3_VERSION-$GEANT3_REVISION} ${GEANT4_VMC_VERSION:+GEANT4_VMC/$GEANT4_VMC_VERSION-$GEANT4_VMC_REVISION} ${VC_VERSION:+Vc/$VC_VERSION-$VC_REVISION}
 # Our environment
 setenv ALIROOT_VERSION \$version
 setenv ALICE \$::env(BASEDIR)/$PKGNAME

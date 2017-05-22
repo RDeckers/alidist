@@ -11,6 +11,26 @@ tag: dev
 incremental_recipe: |
   make ${JOBS:+-j$JOBS} install
   mkdir -p $INSTALLROOT/etc/modulefiles && rsync -a --delete etc/modulefiles/ $INSTALLROOT/etc/modulefiles
+  # install the compilation database so that we can post-check the code
+  cp ${BUILDDIR}/compile_commands.json ${INSTALLROOT}
+
+  DEVEL_SOURCES="`readlink $SOURCEDIR || echo $SOURCEDIR`"
+  # This really means we are in development mode. We need to make sure we
+  # use the real path for sources in this case. We also copy the
+  # compile_commands.json file so that IDEs can make use of it directly, this
+  # is a departure from our "no changes in sourcecode" policy, but for a good reason
+  # and in any case the file is in gitignore.
+  if [ "$DEVEL_SOURCES" != "$SOURCEDIR" ]; then
+    perl -p -i -e "s|$SOURCEDIR|$DEVEL_SOURCES|" compile_commands.json
+    ln -sf $BUILDDIR/compile_commands.json $DEVEL_SOURCES/compile_commands.json
+  fi
+  if [[ $ALIBUILD_O2_TESTS ]]; then
+    make test
+  fi
+valid_defaults:
+  - o2
+  - o2-daq
+  - o2-dev-fairroot
 ---
 #!/bin/sh
 export ROOTSYS=$ROOT_ROOT
@@ -58,6 +78,7 @@ if [[ $GIT_TAG == master ]]; then
   CONTINUE_ON_ERROR=true
 fi
 make ${CONTINUE_ON_ERROR+-k} ${JOBS+-j $JOBS} install
+
 # install the compilation database so that we can post-check the code
 cp compile_commands.json ${INSTALLROOT}
 
@@ -88,7 +109,12 @@ module load BASE/1.0 FairRoot/$FAIRROOT_VERSION-$FAIRROOT_REVISION ${DDS_ROOT:+D
 setenv O2_ROOT \$::env(BASEDIR)/$PKGNAME/\$version
 setenv VMCWORKDIR \$::env(O2_ROOT)/share
 prepend-path PATH \$::env(O2_ROOT)/bin
+prepend-path MANPATH \$::env(O2_ROOT)/share/man
 prepend-path LD_LIBRARY_PATH \$::env(O2_ROOT)/lib
 $([[ ${ARCHITECTURE:0:3} == osx ]] && echo "prepend-path DYLD_LIBRARY_PATH \$::env(O2_ROOT)/lib")
 EoF
 mkdir -p $INSTALLROOT/etc/modulefiles && rsync -a --delete etc/modulefiles/ $INSTALLROOT/etc/modulefiles
+
+if [[ $ALIBUILD_O2_TESTS ]]; then
+  make test
+fi

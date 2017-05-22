@@ -2,7 +2,9 @@ package: AliPhysics
 version: "%(commit_hash)s%(defaults_upper)s"
 requires:
   - AliRoot
-source: https://gitlab.cern.ch/alice-legacy/AliPhysics-legacy.git
+build_requires:
+  - "Xcode:(osx.*)"
+source: https://github.com/alisw/AliPhysics
 tag: master
 env:
   ALICE_PHYSICS: "$ALIPHYSICS_ROOT"
