@@ -12,7 +12,7 @@ build_requires:
  - "GCC-Toolchain:(?!osx)"
 ---
 #!/bin/bash -e
-case $ARCHITECTURE in 
+case $ARCHITECTURE in
   osx*)
     [ ! "X$OPENSSL_ROOT" = X ] || OPENSSL_ROOT=`brew --prefix openssl`
   ;;
@@ -25,7 +25,8 @@ cmake "$SOURCEDIR" -DCMAKE_INSTALL_PREFIX=$INSTALLROOT                \
                    -DENABLE_READLINE=FALSE                            \
                    -DCMAKE_BUILD_TYPE=RelWithDebInfo                  \
                    ${OPENSSL_ROOT:+-DOPENSSL_ROOT_DIR=$OPENSSL_ROOT}  \
-                   -DZLIB_ROOT=$ZLIB_ROOT
+                   -DZLIB_ROOT=$ZLIB_ROOT\
+                   -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -Wno-error=c++11-compat -Wno-error=c++14-compat -Wno-error=terminate"
 make ${JOBS:+-j$JOBS}
 make install
 ln -sf lib $INSTALLROOT/lib64
