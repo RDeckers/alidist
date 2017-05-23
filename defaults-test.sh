@@ -1,7 +1,7 @@
 package: defaults-test
 version: v1
 env:
-  CXXFLAGS: "-fPIC -g -O3 -std=c++11"
+  CXXFLAGS: "-fPIC -g -O3 -std=c++03"
   CFLAGS: "-fPIC -g -O3"
   CMAKE_BUILD_TYPE: "RELEASE"
 ---
