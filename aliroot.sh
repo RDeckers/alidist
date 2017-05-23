@@ -2,8 +2,8 @@ package: AliRoot
 version: "%(commit_hash)s%(defaults_upper)s"
 requires:
   - ROOT
-  - DPMJET
 #  Not needed rn, much faster without
+#  - DPMJET
 #  - fastjet:(?!.*ppc64)
 #  - GEANT3
 #  - GEANT4_VMC
