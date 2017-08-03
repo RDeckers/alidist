@@ -6,7 +6,6 @@ env:
   CMAKE_BUILD_TYPE: "RELWITHDEBINFO"
 disable:
   - AliEn-Runtime
-  - AliRoot
 overrides:
   autotools:
     tag: v1.5.0
@@ -33,9 +32,6 @@ overrides:
   AliRoot:
     requires:
       - ROOT
-      - fastjet:(?!.*ppc64)
-      - GEANT3
-      - GEANT4_VMC
       - Vc
       - ZeroMQ
   GSL:
